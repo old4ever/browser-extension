@@ -174,9 +174,9 @@ if (!window._hasExecutedSlExtension) {
           );
           const valueSetter = descriptor ? descriptor.set : null;
 
-          // More on why we're dispatching an event at the end of the function definition.
-          const focusEvent = new Event("focus", { bubbles: true });
-          input.dispatchEvent(focusEvent);
+          // Focus the input to ensure frameworks that rely on real focus state
+          // (e.g. React-Hook-Form's touched) pick up on the change.
+          input.focus();
 
           if (valueSetter) {
             valueSetter.call(input, value);
@@ -185,7 +185,7 @@ if (!window._hasExecutedSlExtension) {
             input.value = value;
           }
 
-          // Define and dispatch a bubbling 'input' event to trigger React's event system.
+          // Dispatch bubbling 'input' event to trigger React's event system.
           const inputEvent = new Event("input", { bubbles: true });
           input.dispatchEvent(inputEvent);
           // 'input' and 'change' events are interchangable to React's event system when \
@@ -194,10 +194,8 @@ if (!window._hasExecutedSlExtension) {
           // a standard DOM (i.e Vanilla JS/other frameworks) and have different functionality.
           const changeEvent = new Event("change", { bubbles: true });
           input.dispatchEvent(changeEvent);
-          // We can also dispatch 'blur' event to emulate natural user behaviour and intended UX.
-          // Simply changing the input.value doesn't trigget any events.
-          const blurEvent = new Event("blur", { bubbles: true });
-          input.dispatchEvent(blurEvent);
+          // Blur the input to trigger validation that keys on blur state (e.g. touched).
+          input.blur();
         },
 
         async handleOnClickSLButton(inputElem, slButton) {
